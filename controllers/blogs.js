@@ -1,24 +1,22 @@
-const logger = require('../utils/logger')
-const mongoose = require('mongoose')
+const blogsRouter = require('express').Router()
+const Blog = require('../models/blog')
 
-mongoose.set('strictQuery', false)
-
-logger.info('connecting to', config.MONGODB_URI)
-
-mongoose.connect(config.MONGODB_URI)
-  .then(() => {
-    logger.info('connected to MongoDB')
-  })
-  .catch((error) => {
-    logger.error('error connecting to MongoDB:', error.message)
-  })
-
-
-const blogSchema = new mongoose.Schema({
-  title: String,
-  author: String,
-  url: String,
-  likes: Number
+blogsRouter.get('/', (request, response) => {
+  Blog
+    .find({})
+    .then(blogs => {
+      response.json(blogs)
+    })
 })
 
+blogsRouter.post('/', (request, response) => {
+  const blog = new Blog(request.body)
 
+  blog
+    .save()
+    .then(result => {
+      response.status(201).json(result)
+    })
+})
+
+module.exports = blogsRouter
