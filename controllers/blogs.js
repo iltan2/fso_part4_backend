@@ -1,6 +1,7 @@
 const blogsRouter = require('express').Router()
 const Blog = require('../models/blog')
 
+console.log('loading the blog')
 blogsRouter.get('/', (request, response) => {
   Blog
     .find({})
@@ -11,7 +12,6 @@ blogsRouter.get('/', (request, response) => {
 
 blogsRouter.post('/', (request, response) => {
   const blog = new Blog(request.body)
-
   blog
     .save()
     .then(result => {
