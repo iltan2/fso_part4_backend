@@ -28,7 +28,6 @@ const mostBlogs = (blogs) => {
   if (blogs.length === 0 || blogs === null) {
     return {};
   }
-  console.log(blogs)
   const newBlogs = [];
   const authors = [];
   blogs.forEach((blog) => {
@@ -54,7 +53,6 @@ const mostLikes = (blogs) => {
   if (blogs.length === 0 || blogs === null) {
     return {};
   }
-  console.log(blogs)
   const newBlogs = [];
   const authors = [];
   blogs.forEach((blog) => {
