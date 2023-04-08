@@ -4,28 +4,15 @@ const app = require("../app");
 
 const api = supertest(app);
 
-const Blog = require('../models/blog')
+const helper = require("./blog_test_helper")
 
-const initialBlogs = [
-  {
-    title: "Test Title",
-    author: "Test author",
-    url: "Test url",
-    likes: 12345
-  },
-  {
-    title: "Test Title 2",
-    author: "Test author 2",
-    url: "Test url 2",
-    likes: 10
-  },
-]
+const Blog = require('../models/blog')
 
 beforeEach(async () => {
   await Blog.deleteMany({})
-  let blogObject = new Blog(initialBlogs[0])
+  let blogObject = new Blog(helper.initialBlogs[0])
   await blogObject.save()
-  blogObject = new Blog(initialBlogs[1])
+  blogObject = new Blog(helper.initialBlogs[1])
   await blogObject.save()
 })
 
@@ -37,17 +24,39 @@ test("notes are returned as json", async () => {
     .expect("Content-Type", /application\/json/);
 });
 
-test('there are two records', async () => {
+test('all notes are returned', async () => {
   const response = await api.get('/api/blogs')
-
-  expect(response.body).toHaveLength(initialBlogs.length)
+  expect(response.body).toHaveLength(helper.initialBlogs.length)
 })
 
-test('the first record title is Test', async () => {
+test('a specific title is within the returned blogs', async () => {
+  const response = await api.get('/api/blogs')
+  const titles = response.body.map(r => r.title)
+  expect(titles).toContain('Test Title')
+})
+
+test('a valid blog can be added', async () => {
+  const newBlog = {
+    title: 'new title test',
+    author: 'new author test',
+    url: 'new url test',
+    likes: 100,
+  }
+
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(201)
+    .expect('Content-Type', /application\/json/)
+
   const response = await api.get('/api/blogs')
 
-  const 
-  expect(response.body[0].title).toBe('Test Title')
+  const titles = response.body.map(r => r.title)
+
+  expect(response.body).toHaveLength(helper.initialBlogs.length + 1)
+  expect(titles).toContain(
+    'new title test'
+  )
 })
 
 afterAll(async () => {
