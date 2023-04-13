@@ -160,6 +160,24 @@ test("updates the blog with new data", async () => {
   expect(updatedBody.likes).toBe(updatedBlog.likes);
 });
 
+test("returns 404 if id not found", async () => {
+  const newBlog = {
+    url: "put url test",
+    author: "put author test",
+    title: "put title test",
+    likes: 99,
+  };
+
+  const response = await app.post("/api/blogs").send(newBlog).expect(201);
+
+  const invalidId = "9999999999";
+
+  const updatedResponse = await request(app)
+    .put(`/api/blogs/${invalidId}`)
+    .send(updatedBlog)
+    .expect(404);
+});
+
 afterAll(async () => {
   await mongoose.connection.close();
 });
