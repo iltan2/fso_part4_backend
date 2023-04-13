@@ -139,6 +139,42 @@ test('succeeds with status code 204 if id is valid', async () => {
   expect(titles).not.toContain(noteToDelete.title)
 })
 
+test('updates the blog with new data', async () => {
+  const newBlog = {
+    url: "put url test",
+    author: "put author test",
+    title: "put title test",
+    likes: 99,
+  };
+
+  const response = await app
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(201);
+
+  const blogId = response.body.id;
+
+  const updatedBlog = {
+    url: "put updated url test",
+    author: "put updated author test",
+    title: "put updated title test",
+    likes: 123,
+  }
+
+  const updatedResponse = await request(app)
+    .put(`/api/blogs/${blogId}`)
+    .send(updatedBlog)
+    .expect(200);
+
+  const updatedBody=updatedResponse.body
+
+  expect(updatedBody.title).toBe(updatedBlog.title);
+  expect(updatedBody.author).toBe(updatedBlog.author);
+  expect(updatedBody.url).toBe(updatedBlog.url);
+  expect(updatedBody.likes).toBe(updatedBlog.likes);
+    
+}) 
+
 afterAll(async () => {
   await mongoose.connection.close();
 });
