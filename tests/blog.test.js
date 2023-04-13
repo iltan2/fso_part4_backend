@@ -34,6 +34,21 @@ test("a specific title is within the returned blogs", async () => {
   expect(titles).toContain("Test Title");
 });
 
+test("identifier is id", () => {
+  if (blogObject.length > 0) {
+    blogObject.map((blog) => {
+      expect(blog.id).toBeDefined();
+    });
+  }
+});
+
+test("identifier is not _id", () => {
+  if (blogObject.length > 0) {
+    blogObject.map((blog) => {
+      expect(blog._id).not.toBeDefined();
+    });
+  }
+});
 
 test("a valid blog can be added", async () => {
   const newBlog = {
