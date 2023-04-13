@@ -86,11 +86,12 @@ test("default likes is 0", async () => {
     .expect("Content-Type", /application\/json/);
 
   const response = await api.get("/api/blogs");
-  const blogLikes = response.body.find((r)=> r.title==="new title test 2").likes;
+  const blogLikes = response.body.find(
+    (r) => r.title === "new title test 2"
+  ).likes;
 
   expect(blogLikes).toBe(0);
 });
-
 
 test("title is required", async () => {
   const newBlog = {
@@ -99,11 +100,7 @@ test("title is required", async () => {
     likes: 100,
   };
 
-  await api
-    .post("/api/blogs")
-    .send(newBlog)
-    .expect(400)
-
+  await api.post("/api/blogs").send(newBlog).expect(400);
 });
 
 test("url is required", async () => {
@@ -113,33 +110,25 @@ test("url is required", async () => {
     likes: 101,
   };
 
-  await api
-    .post("/api/blogs")
-    .send(newBlog)
-    .expect(400)
-
+  await api.post("/api/blogs").send(newBlog).expect(400);
 });
 
-test('succeeds with status code 204 if id is valid', async () => {
-  const blogsAtStart = await helper.blogsInDb()
-  const blogToDelete = blogsAtStart[0]
+test("succeeds with status code 204 if id is valid", async () => {
+  const blogsAtStart = await helper.blogsInDb();
+  const blogToDelete = blogsAtStart[0];
 
-  await api
-    .delete(`/api/blogs/${blogToDelete.id}`)
-    .expect(204)
+  await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204);
 
-  const blogsAtEnd = await helper.blogsInDb()
+  const blogsAtEnd = await helper.blogsInDb();
 
-  expect(blogsAtEnd).toHaveLength(
-    helper.initialBlogs.length - 1
-  )
+  expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length - 1);
 
-  const titles = blogsAtEnd.map(r => r.title)
+  const titles = blogsAtEnd.map((r) => r.title);
 
-  expect(titles).not.toContain(noteToDelete.title)
-})
+  expect(titles).not.toContain(noteToDelete.title);
+});
 
-test('updates the blog with new data', async () => {
+test("updates the blog with new data", async () => {
   const newBlog = {
     url: "put url test",
     author: "put author test",
@@ -147,10 +136,7 @@ test('updates the blog with new data', async () => {
     likes: 99,
   };
 
-  const response = await app
-    .post('/api/blogs')
-    .send(newBlog)
-    .expect(201);
+  const response = await app.post("/api/blogs").send(newBlog).expect(201);
 
   const blogId = response.body.id;
 
@@ -159,21 +145,20 @@ test('updates the blog with new data', async () => {
     author: "put updated author test",
     title: "put updated title test",
     likes: 123,
-  }
+  };
 
   const updatedResponse = await request(app)
     .put(`/api/blogs/${blogId}`)
     .send(updatedBlog)
     .expect(200);
 
-  const updatedBody=updatedResponse.body
+  const updatedBody = updatedResponse.body;
 
   expect(updatedBody.title).toBe(updatedBlog.title);
   expect(updatedBody.author).toBe(updatedBlog.author);
   expect(updatedBody.url).toBe(updatedBlog.url);
   expect(updatedBody.likes).toBe(updatedBlog.likes);
-    
-}) 
+});
 
 afterAll(async () => {
   await mongoose.connection.close();
