@@ -92,6 +92,34 @@ test("default likes is 0", async () => {
 });
 
 
+test("title is required", async () => {
+  const newBlog = {
+    author: "new author test",
+    url: "new url test",
+    likes: 100,
+  };
+
+  await api
+    .post("/api/blogs")
+    .send(newBlog)
+    .expect(400)
+
+});
+
+test("url is required", async () => {
+  const newBlog = {
+    author: "new author test",
+    title: "new title test",
+    likes: 101,
+  };
+
+  await api
+    .post("/api/blogs")
+    .send(newBlog)
+    .expect(400)
+
+});
+
 afterAll(async () => {
   await mongoose.connection.close();
 });
