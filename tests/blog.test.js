@@ -8,9 +8,10 @@ const helper = require("./blog_test_helper");
 
 const Blog = require("../models/blog");
 
+let blogObject;
 beforeEach(async () => {
   await Blog.deleteMany({});
-  let blogObject = new Blog(helper.initialBlogs[0]);
+  blogObject = new Blog(helper.initialBlogs[0]);
   await blogObject.save();
   blogObject = new Blog(helper.initialBlogs[1]);
   await blogObject.save();
@@ -125,7 +126,7 @@ test("succeeds with status code 204 if id is valid", async () => {
 
   const titles = blogsAtEnd.map((r) => r.title);
 
-  expect(titles).not.toContain(noteToDelete.title);
+  expect(titles).not.toContain(blogToDelete.title);
 });
 
 test("updates the blog with new data", async () => {
@@ -136,7 +137,7 @@ test("updates the blog with new data", async () => {
     likes: 99,
   };
 
-  const response = await app.post("/api/blogs").send(newBlog).expect(201);
+  const response = await api.post("/api/blogs").send(newBlog).expect(201);
 
   const blogId = response.body.id;
 
@@ -147,7 +148,7 @@ test("updates the blog with new data", async () => {
     likes: 123,
   };
 
-  const updatedResponse = await request(app)
+  const updatedResponse = await api
     .put(`/api/blogs/${blogId}`)
     .send(updatedBlog)
     .expect(200);
@@ -160,7 +161,7 @@ test("updates the blog with new data", async () => {
   expect(updatedBody.likes).toBe(updatedBlog.likes);
 });
 
-test("returns 404 if id not found", async () => {
+test("returns 400 if id is malformatted", async () => {
   const newBlog = {
     url: "put url test",
     author: "put author test",
@@ -168,15 +169,48 @@ test("returns 404 if id not found", async () => {
     likes: 99,
   };
 
-  const response = await app.post("/api/blogs").send(newBlog).expect(201);
+  const response = await api.post("/api/blogs").send(newBlog).expect(201);
+
+  const updatedBlog = {
+    url: "put updated url test",
+    author: "put updated author test",
+    title: "put updated title test",
+    likes: 123,
+  };
 
   const invalidId = "9999999999";
 
-  const updatedResponse = await request(app)
+  const updatedResponse = await api
     .put(`/api/blogs/${invalidId}`)
     .send(updatedBlog)
+    .expect(400);
+});
+
+
+test("returns 404 if id is not found", async () => {
+  const newBlog = {
+    url: "put url test",
+    author: "put author test",
+    title: "put title test",
+    likes: 99,
+  };
+
+  const response = await api.post("/api/blogs").send(newBlog).expect(201);
+
+  const updatedBlog = {
+    url: "put updated url test",
+    author: "put updated author test",
+    title: "put updated title test",
+    likes: 123,
+  };
+
+  const invalidId = "111ea21f9e37bd8fc983b111";
+
+  const updatedResponse = await api
+    .put(`/api/blogs/${invalidId}`)
     .expect(404);
 });
+
 
 afterAll(async () => {
   await mongoose.connection.close();

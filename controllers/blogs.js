@@ -19,18 +19,25 @@ blogsRouter.delete("/:id", async (request, response) => {
 });
 
 blogsRouter.put("/:id", async (request, response) => {
+  // before doing anything, check if the id exists
+  const blog = await Blog.findById(request.params.id);
+  if (blog === null) {
+    response.status(404).send({ error: "unknown endpoint" });
+    return null
+  }
   const body = request.body;
 
-  const blog = {
+  const newBlog = {
     title: body.title,
     author: body.author,
     url: body.url,
     likes: body.likes,
   };
 
-  const updatedBlog = Blog.findByIdAndUpdate(request.params.id, blog, {
+  const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, newBlog, {
     new: true,
   });
+
   response.json(updatedBlog);
 });
 
