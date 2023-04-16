@@ -1,5 +1,6 @@
 const blogsRouter = require("express").Router();
 const Blog = require("../models/blog");
+const User = require("../models/user");
 
 console.log("loading the blog");
 blogsRouter.get("/", async (request, response) => {
@@ -8,8 +9,21 @@ blogsRouter.get("/", async (request, response) => {
 });
 
 blogsRouter.post("/", async (request, response) => {
-  const blog = new Blog(request.body);
+  const body = request.body;
+  const users = await User.find({});
+  const user = users[0]
+
+  const blog = new Blog({
+    title: body.title,
+    author: body.author,
+    url: body.url,
+    likes: body.likes,
+    user: user.id,
+  });
   const result = await blog.save();
+  user.blogs = user.blogs.concat(result._id);
+  await user.save();
+
   response.status(201).json(result);
 });
 
@@ -23,7 +37,7 @@ blogsRouter.put("/:id", async (request, response) => {
   const blog = await Blog.findById(request.params.id);
   if (blog === null) {
     response.status(404).send({ error: "unknown endpoint" });
-    return null
+    return null;
   }
   const body = request.body;
 
