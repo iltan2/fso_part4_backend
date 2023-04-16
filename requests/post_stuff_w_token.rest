@@ -3,9 +3,9 @@ Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InJvb3QiLCJpZCI6IjY0M2I3MzJkNWZiODJkYTIzZmY2YjdjYiIsImlhdCI6MTY4MTY0OTQ2Nn0.f1yFkHfz35I8ziwP3E2sd_w7z6R2O74N5mWTDds1qh0
 
 {
-  "title": "My Toes2",
-  "author": "My Knees2",
-  "url": "My Shoulders2",
+  "title": "My Toes3",
+  "author": "My Knees3",
+  "url": "My Shoulders3",
   "likes": 101
   }
 
