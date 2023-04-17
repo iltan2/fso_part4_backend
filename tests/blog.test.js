@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const jwt = require("jsonwebtoken");
 const supertest = require("supertest");
 const app = require("../app");
 
@@ -7,14 +8,22 @@ const api = supertest(app);
 const helper = require("./blog_test_helper");
 
 const Blog = require("../models/blog");
+const User = require("../models/user");
 
 let blogObject;
+let token;
 beforeEach(async () => {
+  const users = await User.find({});
+  const user = users[0];
+  const userForToken = { username: user.username, id: user._id };
+  token = jwt.sign(userForToken, process.env.SECRET);
+
   await Blog.deleteMany({});
-  blogObject = new Blog(helper.initialBlogs[0]);
+  blogObject = new Blog({...helper.initialBlogs[0], user: user._id});
   await blogObject.save();
-  blogObject = new Blog(helper.initialBlogs[1]);
+  blogObject = new Blog({...helper.initialBlogs[1], user: user._id});
   await blogObject.save();
+
 });
 
 test("notes are returned as json", async () => {
@@ -61,6 +70,7 @@ test("a valid blog can be added", async () => {
 
   await api
     .post("/api/blogs")
+    .set("Authorization", `Bearer ${token}`)
     .send(newBlog)
     .expect(201)
     .expect("Content-Type", /application\/json/);
@@ -82,6 +92,7 @@ test("default likes is 0", async () => {
 
   await api
     .post("/api/blogs")
+    .set("Authorization", `Bearer ${token}`)
     .send(newBlog)
     .expect(201)
     .expect("Content-Type", /application\/json/);
@@ -118,7 +129,7 @@ test("succeeds with status code 204 if id is valid", async () => {
   const blogsAtStart = await helper.blogsInDb();
   const blogToDelete = blogsAtStart[0];
 
-  await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204);
+  await api.delete(`/api/blogs/${blogToDelete.id}`).set("Authorization", `Bearer ${token}`).expect(204);
 
   const blogsAtEnd = await helper.blogsInDb();
 
@@ -137,7 +148,7 @@ test("updates the blog with new data", async () => {
     likes: 99,
   };
 
-  const response = await api.post("/api/blogs").send(newBlog).expect(201);
+  const response = await api.post("/api/blogs").set("Authorization", `Bearer ${token}`).send(newBlog).expect(201);
 
   const blogId = response.body.id;
 
@@ -169,7 +180,7 @@ test("returns 400 if id is malformatted", async () => {
     likes: 99,
   };
 
-  const response = await api.post("/api/blogs").send(newBlog).expect(201);
+  const response = await api.post("/api/blogs").set("Authorization", `Bearer ${token}`).send(newBlog).expect(201);
 
   const updatedBlog = {
     url: "put updated url test",
@@ -186,7 +197,6 @@ test("returns 400 if id is malformatted", async () => {
     .expect(400);
 });
 
-
 test("returns 404 if id is not found", async () => {
   const newBlog = {
     url: "put url test",
@@ -195,7 +205,7 @@ test("returns 404 if id is not found", async () => {
     likes: 99,
   };
 
-  const response = await api.post("/api/blogs").send(newBlog).expect(201);
+  const response = await api.post("/api/blogs").set("Authorization", `Bearer ${token}`).send(newBlog).expect(201);
 
   const updatedBlog = {
     url: "put updated url test",
@@ -206,11 +216,8 @@ test("returns 404 if id is not found", async () => {
 
   const invalidId = "111ea21f9e37bd8fc983b111";
 
-  const updatedResponse = await api
-    .put(`/api/blogs/${invalidId}`)
-    .expect(404);
+  const updatedResponse = await api.put(`/api/blogs/${invalidId}`).expect(404);
 });
-
 
 afterAll(async () => {
   await mongoose.connection.close();
